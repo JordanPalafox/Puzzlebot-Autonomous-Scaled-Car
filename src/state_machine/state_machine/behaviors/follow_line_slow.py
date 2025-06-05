@@ -19,19 +19,6 @@ class FollowLineSlow(py_trees.behaviour.Behaviour):
         self.bridge = CvBridge()
 
         # Parámetros para velocidad lenta
-<<<<<<< HEAD
-        self.roi_height = 30        # ROI más pequeño para respuesta lenta
-        self.roi_width = 200        # ROI más estrecho
-        self.threshold = 75
-        self.kp = 0.2             # Más agresivo
-        self.ki = 0.05             # Integral para eliminar error residual
-        self.kd = 0.2             # Derivativo para suavizar
-        self.linear_speed = 0.06   # Velocidad lenta
-        self.max_angular = 0.18     # Giros más agresivos
-        self.smoothing = 0.7       # Menos suavizado para respuesta lenta
-        
-        # Variables de estado simplificadas
-=======
         self.roi_height = 30
         self.roi_width = 200
         self.threshold = 75
@@ -43,7 +30,6 @@ class FollowLineSlow(py_trees.behaviour.Behaviour):
         self.smoothing = 0.7
 
         # Variables de estado
->>>>>>> 8b3b307 (giros y maquina de estados bien hecha)
         self.last_error = 0.0
         self.smoothed_error = 0.0
         self.integral_error = 0.0
