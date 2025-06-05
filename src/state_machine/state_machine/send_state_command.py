@@ -21,7 +21,7 @@ def main(args=None):
     node = StateCommandPublisher()
 
     if len(sys.argv) < 2:
-        print("Uso: ros2 run stateMachine sendStateCommand <comando>")
+        print("Uso: ros2 run state_machine send_state_command <comando>")
         print("Comandos disponibles: idle, followLineFast, followLineSlow, turnRight, turnLeft, stop")
         node.destroy_node()
         rclpy.shutdown()
@@ -30,7 +30,7 @@ def main(args=None):
     command = sys.argv[1]
     node.publish_command(command)
     
-    # Esperar un momento para asegurarse de que el mensaje se envu00eda
+    # Esperar un momento para asegurarse de que el mensaje se envía
     rclpy.spin_once(node, timeout_sec=1.0)
     
     node.destroy_node()

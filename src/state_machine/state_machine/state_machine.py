@@ -3,12 +3,14 @@ import rclpy
 from rclpy.node import Node
 import py_trees
 import threading
+import cv2
 from std_msgs.msg import String
 from state_machine.behaviors.follow_line_fast import FollowLineFast
 from state_machine.behaviors.follow_line_slow import FollowLineSlow
 from state_machine.behaviors.turn_right import TurnRight
 from state_machine.behaviors.turn_left import TurnLeft
 from state_machine.behaviors.stop import Stop
+from state_machine.behaviors.idle import Idle
 
 # Variable global para almacenar el comando actual
 current_state_command = "idle"
@@ -25,6 +27,11 @@ class StateMachineRoot(py_trees.behaviour.Behaviour):
     
     def setup_with_node(self, node):
         self.node = node
+        # Crear ventanas de debug para seguimiento de línea
+        cv2.namedWindow('Debug - Original', cv2.WINDOW_NORMAL)
+        cv2.namedWindow('Debug - Procesado', cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('Debug - Original', 400, 300)
+        cv2.resizeWindow('Debug - Procesado', 400, 300)
         # No configuramos los comportamientos aquí, lo haremos en la primera actualización
         # cuando ROS esté completamente inicializado
     
@@ -88,19 +95,22 @@ class StateMachineRoot(py_trees.behaviour.Behaviour):
             # Finalizar el comportamiento anterior si existe
             if self.current_behavior is not None:
                 try:
+                    if self.node:
+                        self.node.get_logger().info(f"🔄 Terminando comportamiento anterior: {self.current_behavior.name}")
                     self.current_behavior.terminate(py_trees.common.Status.INVALID)
                 except Exception as e:
                     if self.node:
                         self.node.get_logger().error(f"Error al terminar comportamiento: {str(e)}")
             
             # Actualizar el comportamiento actual
+            old_behavior = self.current_behavior.name if self.current_behavior else "None"
             self.current_behavior = self.state_behaviors[current_state_command]
             
             # Inicializar el nuevo comportamiento
             try:
-                self.current_behavior.initialise()
                 if self.node:
-                    self.node.get_logger().info(f"Iniciando comportamiento {self.current_behavior.name}")
+                    self.node.get_logger().info(f"🔄 Cambiando de {old_behavior} a {self.current_behavior.name}")
+                self.current_behavior.initialise()
             except Exception as e:
                 if self.node:
                     self.node.get_logger().error(f"Error al inicializar comportamiento: {str(e)}")
@@ -109,6 +119,19 @@ class StateMachineRoot(py_trees.behaviour.Behaviour):
         # Ejecutar el comportamiento actual
         try:
             status = self.current_behavior.update()
+            
+            # Mostrar estado actual en las ventanas de debug
+            if current_state_command in ["idle", "stop"]:
+                # Crear imagen de estado para estados no de seguimiento
+                import numpy as np
+                state_img = np.zeros((200, 400, 3), dtype=np.uint8)
+                cv2.putText(state_img, f'STATE: {current_state_command.upper()}', 
+                           (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 255, 0), 3)
+                cv2.putText(state_img, 'ROBOT STOPPED', 
+                           (80, 150), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255), 2)
+                cv2.imshow('Debug - Original', state_img)
+                cv2.imshow('Debug - Procesado', state_img)
+                cv2.waitKey(1)
             
             # Si el comportamiento completó con éxito, registrarlo
             if status == py_trees.common.Status.SUCCESS:
@@ -163,7 +186,7 @@ def main():
     time.sleep(2.0)
     
     # Crear comportamientos (pasando el nodo a cada uno)
-    idle = py_trees.behaviours.Running(name="IdleBehavior")  # Comportamiento simple para estado idle
+    idle = Idle(name="Idle", node=node)  # Usar nuestro behavior Idle personalizado
     followLineFast = FollowLineFast(name="FollowLineFast", node=node)
     followLineSlow = FollowLineSlow(name="FollowLineSlow", node=node)
     turnRight = TurnRight(name="TurnRight", node=node)
@@ -192,15 +215,21 @@ def main():
     spin_thread.start()
 
     node.get_logger().info("Starting state machine...")
+    tick_count = 0
     try:
         while rclpy.ok():
             tree.tick()
-            node.get_logger().info(f"Estado actual: {current_state_command}, Completado: {last_completed_state}")
+            # Log cada 5 segundos en lugar de cada segundo para reducir spam
+            if tick_count % 5 == 0:
+                node.get_logger().info(f"Estado actual: {current_state_command}, Completado: {last_completed_state}")
+            tick_count += 1
             time.sleep(1.0)
     except KeyboardInterrupt:
         pass
     finally:
         node.get_logger().info("Shutting down state machine")
+        # Cerrar ventanas de OpenCV
+        cv2.destroyAllWindows()
         # No destruir el nodo aquí, se hará después de salir del bucle
         rclpy.shutdown()
         # Ahora podemos destruir el nodo con seguridad
