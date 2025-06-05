@@ -19,14 +19,14 @@ class FollowLineFast(py_trees.behaviour.Behaviour):
         self.bridge = CvBridge()
         
         # Parámetros para velocidad RÁPIDA
-        self.roi_height = 60        # ROI más pequeño para respuesta rápida
+        self.roi_height = 30        # ROI más pequeño para respuesta rápida
         self.roi_width = 200        # ROI más estrecho
         self.threshold = 75
         self.kp = 0.2             # Más agresivo
         self.ki = 0.05             # Integral para eliminar error residual
         self.kd = 0.2             # Derivativo para suavizar
         self.linear_speed = 0.12   # Velocidad RÁPIDA
-        self.max_angular = 0.17     # Giros más agresivos
+        self.max_angular = 0.18     # Giros más agresivos
         self.smoothing = 0.7       # Menos suavizado para respuesta rápida
         
         # Variables de estado simplificadas
