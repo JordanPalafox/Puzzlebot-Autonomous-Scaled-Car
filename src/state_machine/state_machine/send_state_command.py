@@ -22,7 +22,7 @@ def main(args=None):
 
     if len(sys.argv) < 2:
         print("Uso: ros2 run state_machine send_state_command <comando>")
-        print("Comandos disponibles: idle, followLineFast, followLineSlow, turnRight, turnLeft, stop")
+        print("Comandos disponibles: idle, followLineFast, followLineSlow, turnRight, turnLeft, stop, moveStraight")
         node.destroy_node()
         rclpy.shutdown()
         return 1

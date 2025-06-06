@@ -7,11 +7,15 @@ from .follow_line_slow import FollowLineSlow
 from .turn_right import TurnRight
 from .turn_left import TurnLeft
 from .stop import Stop
+from .idle import Idle
+from .move_straight import MoveStraight
 
 __all__ = [
     'FollowLineFast',
     'FollowLineSlow', 
     'TurnRight',
     'TurnLeft',
-    'Stop'
+    'Stop',
+    'Idle',
+    'MoveStraight'
 ] 

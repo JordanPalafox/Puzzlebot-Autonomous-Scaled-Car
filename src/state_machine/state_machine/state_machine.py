@@ -11,6 +11,7 @@ from state_machine.behaviors.turn_right import TurnRight
 from state_machine.behaviors.turn_left import TurnLeft
 from state_machine.behaviors.stop import Stop
 from state_machine.behaviors.idle import Idle
+from state_machine.behaviors.move_straight import MoveStraight
 
 # Variable global para almacenar el comando actual
 current_state_command = "idle"
@@ -147,6 +148,7 @@ def main():
     turnRight = TurnRight(name="TurnRight", node=node)
     turnLeft = TurnLeft(name="TurnLeft", node=node)
     stop = Stop(name="Stop", node=node)
+    moveStraight = MoveStraight(name="MoveStraight", node=node)
 
     # Crear el Behavior Tree
     root = StateMachineRoot()
@@ -157,6 +159,7 @@ def main():
     root.add_state("turnRight", turnRight)
     root.add_state("turnLeft", turnLeft)
     root.add_state("stop", stop)
+    root.add_state("moveStraight", moveStraight)
 
     tree = py_trees.trees.BehaviourTree(root)
     tree.setup()
